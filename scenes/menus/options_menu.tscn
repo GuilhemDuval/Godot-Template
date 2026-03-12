@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://db32ibncjrlre"]
+
+[ext_resource type="Script" uid="uid://b6jfkqq4tyu8n" path="res://scenes/menus/options_menu.gd" id="1_bp0ux"]
+
+[node name="OptionsMenu" type="Control" unique_id=1614975361]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_bp0ux")
