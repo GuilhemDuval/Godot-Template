@@ -1,6 +1,9 @@
 [gd_scene format=3 uid="uid://b825vjjcm50wl"]
 
+[ext_resource type="Script" uid="uid://dh4wav6d4aps6" path="res://core/transitions/fade_layer.gd" id="1_4rph4"]
+
 [node name="FadeLayer" type="CanvasLayer" unique_id=1083594783]
+script = ExtResource("1_4rph4")
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1587131328]
 anchors_preset = 15

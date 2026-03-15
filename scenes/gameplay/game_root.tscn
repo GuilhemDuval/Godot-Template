@@ -4,3 +4,9 @@
 
 [node name="GameRoot" type="Node" unique_id=1539137739]
 script = ExtResource("1_c5wfs")
+
+[node name="Node2D" type="Node2D" parent="." unique_id=1465665839]
+
+[node name="EntityContainer" type="Node2D" parent="." unique_id=1093904609]
+
+[node name="SystemsContainer" type="Node" parent="." unique_id=1193734295]

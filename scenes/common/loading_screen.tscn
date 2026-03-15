@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://cuti0sc8oqgt"]
 
+[ext_resource type="Script" uid="uid://dtb1111hyl4s2" path="res://scenes/common/loading_screen.gd" id="1_4pk3o"]
+
 [node name="LoadingScreen" type="Control" unique_id=933736299]
 layout_mode = 3
 anchors_preset = 15
@@ -7,3 +9,4 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_4pk3o")
