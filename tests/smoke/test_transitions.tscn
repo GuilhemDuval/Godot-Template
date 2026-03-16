@@ -1,0 +1,64 @@
+[gd_scene format=3 uid="uid://cbfvbmmt7pj1u"]
+
+[ext_resource type="Script" uid="uid://dd4rl278olvjj" path="res://tests/smoke/test_transitions.gd" id="1"]
+
+[node name="TestTransitions" type="Control" unique_id=1167321778]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="." unique_id=104508636]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.12, 0.14, 1)
+
+[node name="CenterPanel" type="PanelContainer" parent="." unique_id=1046745592]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -90.0
+offset_right = 260.0
+offset_bottom = 90.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterPanel" unique_id=787049334]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterPanel/MarginContainer" unique_id=899088320]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="CenterPanel/MarginContainer/VBoxContainer" unique_id=352510753]
+layout_mode = 2
+text = "Transition Test Scene"
+horizontal_alignment = 1
+
+[node name="CurrentTransitionLabel" type="Label" parent="CenterPanel/MarginContainer/VBoxContainer" unique_id=1178822046]
+layout_mode = 2
+text = "Preparing..."
+horizontal_alignment = 1
+
+[node name="HintLabel" type="Label" parent="CenterPanel/MarginContainer/VBoxContainer" unique_id=492404405]
+layout_mode = 2
+text = "This scene plays every transition one after another."
+horizontal_alignment = 1
+
+[node name="TransitionHost" type="Node" parent="." unique_id=1612246732]

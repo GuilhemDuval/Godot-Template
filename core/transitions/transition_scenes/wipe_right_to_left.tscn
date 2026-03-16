@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://b786y2rx157rk"]
+
+[ext_resource type="Script" uid="uid://dmot5asnystth" path="res://core/transitions/transitions_type/wipe_layer.gd" id="1_xv12s"]
+
+[node name="WipeLayer" type="CanvasLayer" unique_id=1083594783]
+script = ExtResource("1_xv12s")
+duration = 0.35
+wipe_direction = 1
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1587131328]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
