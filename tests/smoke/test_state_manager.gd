@@ -57,8 +57,8 @@ func _run_all_tests() -> void:
 func _test_initial_reset() -> void:
 	_prepare_clean_state()
 
-	_assert_true(StateManager.get_state() == StateManager.GameState.BOOT, "Initial reset puts current state to BOOT")
-	_assert_true(StateManager.get_previous_state() == StateManager.GameState.BOOT, "Initial reset puts previous state to BOOT")
+	_assert_true(StateManager.get_state() == GameStates.State.BOOT, "Initial reset puts current state to BOOT")
+	_assert_true(StateManager.get_previous_state() == GameStates.State.BOOT, "Initial reset puts previous state to BOOT")
 	_assert_true(not StateManager.is_paused, "Initial reset clears pause")
 	_assert_true(not StateManager.is_locked(), "Initial reset clears lock")
 
@@ -66,40 +66,40 @@ func _test_initial_reset() -> void:
 func _test_valid_transition() -> void:
 	_prepare_clean_state()
 
-	var result := StateManager.set_state(StateManager.GameState.MAIN_MENU)
+	var result := StateManager.set_state(GameStates.State.MAIN_MENU)
 
 	_assert_true(result, "BOOT -> MAIN_MENU is allowed")
-	_assert_true(StateManager.get_state() == StateManager.GameState.MAIN_MENU, "Current state becomes MAIN_MENU")
-	_assert_true(StateManager.get_previous_state() == StateManager.GameState.BOOT, "Previous state becomes BOOT")
+	_assert_true(StateManager.get_state() == GameStates.State.MAIN_MENU, "Current state becomes MAIN_MENU")
+	_assert_true(StateManager.get_previous_state() == GameStates.State.BOOT, "Previous state becomes BOOT")
 
 	_assert_true(state_changed_events.size() == 1, "Valid transition emits one state_changed signal")
 	if state_changed_events.size() == 1:
-		_assert_true(state_changed_events[0]["from"] == StateManager.GameState.BOOT, "state_changed previous_state is correct")
-		_assert_true(state_changed_events[0]["to"] == StateManager.GameState.MAIN_MENU, "state_changed new_state is correct")
+		_assert_true(state_changed_events[0]["from"] == GameStates.State.BOOT, "state_changed previous_state is correct")
+		_assert_true(state_changed_events[0]["to"] == GameStates.State.MAIN_MENU, "state_changed new_state is correct")
 
 
 func _test_same_state_is_no_op() -> void:
 	_prepare_clean_state()
-	StateManager.set_state(StateManager.GameState.MAIN_MENU)
+	StateManager.set_state(GameStates.State.MAIN_MENU)
 	_reset_event_buffers()
 
-	var result := StateManager.set_state(StateManager.GameState.MAIN_MENU)
+	var result := StateManager.set_state(GameStates.State.MAIN_MENU)
 
 	_assert_true(result, "Setting the same state returns true")
-	_assert_true(StateManager.get_state() == StateManager.GameState.MAIN_MENU, "Current state stays MAIN_MENU")
+	_assert_true(StateManager.get_state() == GameStates.State.MAIN_MENU, "Current state stays MAIN_MENU")
 	_assert_true(state_changed_events.is_empty(), "Same-state request emits no state_changed signal")
 	_assert_true(rejected_events.is_empty(), "Same-state request emits no rejection signal")
 
 
 func _test_invalid_transition_is_rejected() -> void:
 	_prepare_clean_state()
-	StateManager.set_state(StateManager.GameState.MAIN_MENU)
+	StateManager.set_state(GameStates.State.MAIN_MENU)
 	_reset_event_buffers()
 
-	var result := StateManager.set_state(StateManager.GameState.IN_GAME)
+	var result := StateManager.set_state(GameStates.State.IN_GAME)
 
 	_assert_true(not result, "MAIN_MENU -> IN_GAME is rejected if not explicitly allowed")
-	_assert_true(StateManager.get_state() == StateManager.GameState.MAIN_MENU, "Current state remains MAIN_MENU after invalid transition")
+	_assert_true(StateManager.get_state() == GameStates.State.MAIN_MENU, "Current state remains MAIN_MENU after invalid transition")
 	_assert_true(rejected_events.size() == 1, "Invalid transition emits one rejection signal")
 
 
@@ -111,38 +111,38 @@ func _test_invalid_state_is_rejected() -> void:
 	var result := StateManager.set_state(invalid_state)
 
 	_assert_true(not result, "Invalid target state is rejected")
-	_assert_true(StateManager.get_state() == StateManager.GameState.BOOT, "Current state stays unchanged after invalid state request")
+	_assert_true(StateManager.get_state() == GameStates.State.BOOT, "Current state stays unchanged after invalid state request")
 	_assert_true(rejected_events.size() == 1, "Invalid target state emits one rejection signal")
 
 
 func _test_state_helpers() -> void:
 	_prepare_clean_state()
-	StateManager.set_state(StateManager.GameState.LOADING)
+	StateManager.set_state(GameStates.State.LOADING)
 
-	_assert_true(StateManager.is_in_state(StateManager.GameState.LOADING), "is_in_state works for current state")
-	_assert_true(not StateManager.is_in_state(StateManager.GameState.IN_GAME), "is_in_state returns false for another state")
+	_assert_true(StateManager.is_in_state(GameStates.State.LOADING), "is_in_state works for current state")
+	_assert_true(not StateManager.is_in_state(GameStates.State.IN_GAME), "is_in_state returns false for another state")
 
 	_assert_true(
-		StateManager.get_state_category() == StateManager.StateCategory.LOADING,
+		StateManager.get_state_category() == GameStates.Category.LOADING,
 		"get_state_category() uses current state by default"
 	)
 
 	_assert_true(
-		StateManager.get_state_category(StateManager.GameState.IN_GAME) == StateManager.StateCategory.GAMEPLAY,
+		StateManager.get_state_category(GameStates.State.IN_GAME) == GameStates.Category.GAMEPLAY,
 		"get_state_category(state) works with explicit state"
 	)
 
 	_assert_true(StateManager.is_loading_state(), "is_loading_state() works")
-	_assert_true(StateManager.is_gameplay_state(StateManager.GameState.IN_GAME), "is_gameplay_state(state) works")
-	_assert_true(StateManager.is_ui_state(StateManager.GameState.MAIN_MENU), "is_ui_state(state) works")
-	_assert_true(StateManager.is_cinematic_state(StateManager.GameState.CUTSCENE), "is_cinematic_state(state) works")
+	_assert_true(StateManager.is_gameplay_state(GameStates.State.IN_GAME), "is_gameplay_state(state) works")
+	_assert_true(StateManager.is_ui_state(GameStates.State.MAIN_MENU), "is_ui_state(state) works")
+	_assert_true(StateManager.is_cinematic_state(GameStates.State.CUTSCENE), "is_cinematic_state(state) works")
 
 
 func _test_pause_allowed_in_game() -> void:
 	_prepare_clean_state()
-	StateManager.set_state(StateManager.GameState.MAIN_MENU)
-	StateManager.set_state(StateManager.GameState.LOADING)
-	StateManager.set_state(StateManager.GameState.IN_GAME)
+	StateManager.set_state(GameStates.State.MAIN_MENU)
+	StateManager.set_state(GameStates.State.LOADING)
+	StateManager.set_state(GameStates.State.IN_GAME)
 	_reset_event_buffers()
 
 	var result := StateManager.set_paused(true)
@@ -164,7 +164,7 @@ func _test_pause_allowed_in_game() -> void:
 
 func _test_pause_forbidden_in_menu() -> void:
 	_prepare_clean_state()
-	StateManager.set_state(StateManager.GameState.MAIN_MENU)
+	StateManager.set_state(GameStates.State.MAIN_MENU)
 	_reset_event_buffers()
 
 	var result := StateManager.set_paused(true)
@@ -176,16 +176,16 @@ func _test_pause_forbidden_in_menu() -> void:
 
 func _test_pause_cleared_on_non_pausable_transition() -> void:
 	_prepare_clean_state()
-	StateManager.set_state(StateManager.GameState.MAIN_MENU)
-	StateManager.set_state(StateManager.GameState.LOADING)
-	StateManager.set_state(StateManager.GameState.IN_GAME)
+	StateManager.set_state(GameStates.State.MAIN_MENU)
+	StateManager.set_state(GameStates.State.LOADING)
+	StateManager.set_state(GameStates.State.IN_GAME)
 	StateManager.set_paused(true)
 	_reset_event_buffers()
 
-	var result := StateManager.set_state(StateManager.GameState.OPTIONS)
+	var result := StateManager.set_state(GameStates.State.OPTIONS)
 
 	_assert_true(result, "IN_GAME -> OPTIONS is allowed")
-	_assert_true(StateManager.get_state() == StateManager.GameState.OPTIONS, "Current state becomes OPTIONS")
+	_assert_true(StateManager.get_state() == GameStates.State.OPTIONS, "Current state becomes OPTIONS")
 	_assert_true(not StateManager.is_paused, "Pause is automatically cleared when entering a non-pausable state")
 
 	_assert_true(pause_changed_events.size() == 1, "Auto-unpause emits one pause_changed signal")
@@ -198,10 +198,10 @@ func _test_lock_blocks_transition() -> void:
 	_reset_event_buffers()
 
 	StateManager.lock_state()
-	var result := StateManager.set_state(StateManager.GameState.MAIN_MENU)
+	var result := StateManager.set_state(GameStates.State.MAIN_MENU)
 
 	_assert_true(not result, "Locked state manager rejects transitions")
-	_assert_true(StateManager.get_state() == StateManager.GameState.BOOT, "Current state stays unchanged while locked")
+	_assert_true(StateManager.get_state() == GameStates.State.BOOT, "Current state stays unchanged while locked")
 	_assert_true(rejected_events.size() == 1, "Rejected transition while locked emits one rejection signal")
 
 	StateManager.unlock_state()
@@ -210,29 +210,30 @@ func _test_lock_blocks_transition() -> void:
 
 func _test_reset_to_boot() -> void:
 	_prepare_clean_state()
-	StateManager.set_state(StateManager.GameState.MAIN_MENU)
-	StateManager.set_state(StateManager.GameState.LOADING)
-	StateManager.set_state(StateManager.GameState.IN_GAME)
+	StateManager.set_state(GameStates.State.MAIN_MENU)
+	StateManager.set_state(GameStates.State.LOADING)
+	StateManager.set_state(GameStates.State.IN_GAME)
 	StateManager.set_paused(true)
 	StateManager.lock_state()
 	_reset_event_buffers()
 
 	StateManager.reset_to_boot()
 
-	_assert_true(StateManager.get_state() == StateManager.GameState.BOOT, "reset_to_boot() restores BOOT as current state")
-	_assert_true(StateManager.get_previous_state() == StateManager.GameState.IN_GAME, "reset_to_boot() preserves the previous state information")
+	_assert_true(StateManager.get_state() == GameStates.State.BOOT, "reset_to_boot() restores BOOT as current state")
+	_assert_true(StateManager.get_previous_state() == GameStates.State.IN_GAME, "reset_to_boot() preserves the previous state information")
 	_assert_true(not StateManager.is_paused, "reset_to_boot() clears pause")
 	_assert_true(not StateManager.is_locked(), "reset_to_boot() clears lock")
 
 	_assert_true(state_changed_events.size() == 1, "reset_to_boot() emits one state_changed signal")
 	_assert_true(pause_changed_events.size() == 1, "reset_to_boot() emits one pause_changed signal if pause was active")
 
+
 func _test_get_state_name() -> void:
 	_prepare_clean_state()
 
 	_assert_true(StateManager.get_state_name() == "BOOT", "get_state_name() uses current state by default")
 	_assert_true(
-		StateManager.get_state_name(StateManager.GameState.IN_GAME) == "IN_GAME",
+		StateManager.get_state_name(GameStates.State.IN_GAME) == "IN_GAME",
 		"get_state_name(state) works with explicit state"
 	)
 	_assert_true(StateManager.get_state_name(999999) == "UNKNOWN", "get_state_name() returns UNKNOWN for invalid state")
@@ -242,21 +243,21 @@ func _test_can_transition_to() -> void:
 	_prepare_clean_state()
 
 	_assert_true(
-		StateManager.can_transition_to(StateManager.GameState.MAIN_MENU),
+		StateManager.can_transition_to(GameStates.State.MAIN_MENU),
 		"can_transition_to() returns true for an allowed transition from BOOT"
 	)
 	_assert_true(
-		not StateManager.can_transition_to(StateManager.GameState.IN_GAME),
+		not StateManager.can_transition_to(GameStates.State.IN_GAME),
 		"can_transition_to() returns false for a forbidden transition from BOOT"
 	)
 
-	StateManager.set_state(StateManager.GameState.MAIN_MENU)
+	StateManager.set_state(GameStates.State.MAIN_MENU)
 	_assert_true(
-		StateManager.can_transition_to(StateManager.GameState.LOADING),
+		StateManager.can_transition_to(GameStates.State.LOADING),
 		"can_transition_to() returns true for MAIN_MENU -> LOADING"
 	)
 	_assert_true(
-		not StateManager.can_transition_to(StateManager.GameState.IN_GAME),
+		not StateManager.can_transition_to(GameStates.State.IN_GAME),
 		"can_transition_to() returns false for MAIN_MENU -> IN_GAME"
 	)
 
@@ -269,15 +270,15 @@ func _test_can_pause_in_state() -> void:
 		"can_pause_in_state() uses current state by default"
 	)
 	_assert_true(
-		StateManager.can_pause_in_state(StateManager.GameState.IN_GAME),
+		StateManager.can_pause_in_state(GameStates.State.IN_GAME),
 		"can_pause_in_state(state) returns true for IN_GAME"
 	)
 	_assert_true(
-		StateManager.can_pause_in_state(StateManager.GameState.CUTSCENE),
+		StateManager.can_pause_in_state(GameStates.State.CUTSCENE),
 		"can_pause_in_state(state) returns true for CUTSCENE"
 	)
 	_assert_true(
-		not StateManager.can_pause_in_state(StateManager.GameState.MAIN_MENU),
+		not StateManager.can_pause_in_state(GameStates.State.MAIN_MENU),
 		"can_pause_in_state(state) returns false for MAIN_MENU"
 	)
 

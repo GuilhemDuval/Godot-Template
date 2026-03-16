@@ -10,35 +10,10 @@ signal pause_changed(is_paused: bool)
 signal state_change_rejected(from_state: int, to_state: int, reason: String)
 
 
-# High-level application states.
-# These should remain broad and reusable across projects.
-enum GameState {
-	BOOT,
-	TITLE,
-	MAIN_MENU,
-	LOADING,
-	IN_GAME,
-	CUTSCENE,
-	OPTIONS,
-	CREDITS,
-	QUITTING
-}
-
-# Lightweight grouping used by other systems that only care
-# about the kind of state, not the exact one.
-enum StateCategory {
-	SYSTEM,
-	UI,
-	GAMEPLAY,
-	CINEMATIC,
-	LOADING
-}
-
-
 # Current global state and previous one.
 # previous_state is kept to support simple return flows and debugging.
-var current_state: int = GameState.BOOT
-var previous_state: int = GameState.BOOT
+var current_state: int = GameStates.State.BOOT
+var previous_state: int = GameStates.State.BOOT
 
 # Pause is handled separately from the main state.
 # This keeps the current context explicit, for example IN_GAME + paused.
@@ -46,79 +21,6 @@ var is_paused: bool = false
 
 # Temporary safeguard used to block transitions during sensitive operations.
 var _state_locked: bool = false
-
-
-# Maps each state to a broader category.
-# This avoids scattering hardcoded state checks across the project.
-const STATE_CATEGORIES := {
-	GameState.BOOT: StateCategory.SYSTEM,
-	GameState.TITLE: StateCategory.UI,
-	GameState.MAIN_MENU: StateCategory.UI,
-	GameState.LOADING: StateCategory.LOADING,
-	GameState.IN_GAME: StateCategory.GAMEPLAY,
-	GameState.CUTSCENE: StateCategory.CINEMATIC,
-	GameState.OPTIONS: StateCategory.UI,
-	GameState.CREDITS: StateCategory.UI,
-	GameState.QUITTING: StateCategory.SYSTEM,
-}
-
-# Only these states are allowed to enter pause.
-# This can easily evolve later if the project needs different pause rules.
-const PAUSABLE_STATES := [
-	GameState.IN_GAME,
-	GameState.CUTSCENE,
-]
-
-# Explicit transition rules keep the flow predictable and easy to debug.
-# A transition must be intentionally allowed here to be valid.
-const ALLOWED_TRANSITIONS := {
-	GameState.BOOT: [
-		GameState.TITLE,
-		GameState.MAIN_MENU,
-		GameState.LOADING,
-	],
-	GameState.TITLE: [
-		GameState.MAIN_MENU,
-		GameState.LOADING,
-		GameState.CREDITS,
-		GameState.QUITTING,
-	],
-	GameState.MAIN_MENU: [
-		GameState.LOADING,
-		GameState.OPTIONS,
-		GameState.CREDITS,
-		GameState.QUITTING,
-	],
-	GameState.LOADING: [
-		GameState.IN_GAME,
-		GameState.MAIN_MENU,
-		GameState.TITLE,
-	],
-	GameState.IN_GAME: [
-		GameState.LOADING,
-		GameState.MAIN_MENU,
-		GameState.CUTSCENE,
-		GameState.OPTIONS,
-		GameState.QUITTING,
-	],
-	GameState.CUTSCENE: [
-		GameState.IN_GAME,
-		GameState.LOADING,
-		GameState.MAIN_MENU,
-		GameState.OPTIONS,
-	],
-	GameState.OPTIONS: [
-		GameState.MAIN_MENU,
-		GameState.IN_GAME,
-		GameState.TITLE,
-	],
-	GameState.CREDITS: [
-		GameState.TITLE,
-		GameState.MAIN_MENU,
-		GameState.QUITTING,
-	],
-	GameState.QUITTING: [],
-}
 
 
 func _ready() -> void:
@@ -133,7 +35,7 @@ func set_state(new_state: int) -> bool:
 		_reject_transition(current_state, new_state, "State manager is locked.")
 		return false
 
-	if not _is_valid_state(new_state):
+	if not GameStates.is_valid_state(new_state):
 		_reject_transition(current_state, new_state, "Target state is invalid.")
 		return false
 
@@ -172,37 +74,33 @@ func is_in_state(state: int) -> bool:
 
 func get_state_category(state: int = -1) -> int:
 	var target_state := current_state if state == -1 else state
-	return STATE_CATEGORIES.get(target_state, StateCategory.SYSTEM)
+	return GameStates.get_category(target_state)
 
 
 func is_gameplay_state(state: int = -1) -> bool:
-	return get_state_category(state) == StateCategory.GAMEPLAY
+	return get_state_category(state) == GameStates.Category.GAMEPLAY
 
 
 func is_ui_state(state: int = -1) -> bool:
-	return get_state_category(state) == StateCategory.UI
+	return get_state_category(state) == GameStates.Category.UI
 
 
 func is_loading_state(state: int = -1) -> bool:
-	return get_state_category(state) == StateCategory.LOADING
+	return get_state_category(state) == GameStates.Category.LOADING
 
 
 func is_cinematic_state(state: int = -1) -> bool:
-	return get_state_category(state) == StateCategory.CINEMATIC
+	return get_state_category(state) == GameStates.Category.CINEMATIC
 
 
 func can_transition_to(new_state: int) -> bool:
 	# Defensive check in case the current state is corrupted or incomplete.
-	if not _is_valid_state(current_state):
-		return false
-
-	var allowed: Array = ALLOWED_TRANSITIONS.get(current_state, [])
-	return new_state in allowed
+	return GameStates.can_transition(current_state, new_state)
 
 
 func can_pause_in_state(state: int = -1) -> bool:
 	var target_state := current_state if state == -1 else state
-	return target_state in PAUSABLE_STATES
+	return GameStates.is_pausable(target_state)
 
 
 func set_paused(value: bool) -> bool:
@@ -242,7 +140,7 @@ func reset_to_boot() -> void:
 	# A full reset should also clear temporary protections such as state locking.
 	_state_locked = false
 	previous_state = old_state
-	current_state = GameState.BOOT
+	current_state = GameStates.State.BOOT
 
 	# Pause does not make sense in BOOT, so it is cleared explicitly.
 	if is_paused:
@@ -255,32 +153,7 @@ func reset_to_boot() -> void:
 
 func get_state_name(state: int = -1) -> String:
 	var target_state := current_state if state == -1 else state
-
-	match target_state:
-		GameState.BOOT:
-			return "BOOT"
-		GameState.TITLE:
-			return "TITLE"
-		GameState.MAIN_MENU:
-			return "MAIN_MENU"
-		GameState.LOADING:
-			return "LOADING"
-		GameState.IN_GAME:
-			return "IN_GAME"
-		GameState.CUTSCENE:
-			return "CUTSCENE"
-		GameState.OPTIONS:
-			return "OPTIONS"
-		GameState.CREDITS:
-			return "CREDITS"
-		GameState.QUITTING:
-			return "QUITTING"
-		_:
-			return "UNKNOWN"
-
-
-func _is_valid_state(state: int) -> bool:
-	return state in STATE_CATEGORIES
+	return GameStates.get_state_name(target_state)
 
 
 func _reject_transition(from_state: int, to_state: int, reason: String) -> void:
