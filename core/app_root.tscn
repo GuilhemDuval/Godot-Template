@@ -2,16 +2,18 @@
 
 [node name="AppRoot" type="Node" unique_id=581362940]
 
-[node name="UILayer" type="Control" parent="." unique_id=804084100]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
 [node name="TransitionLayer" type="Control" parent="." unique_id=1104437322]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
+[node name="UILayer" type="Control" parent="." unique_id=804084100]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
 [node name="MainLayer" type="Node" parent="." unique_id=741970808]
+
+[node name="LevelContainer" type="Node" parent="." unique_id=382234097]

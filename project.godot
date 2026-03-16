@@ -17,6 +17,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 StateManager="*uid://cnyk5n7wsajyl"
+SceneManager="*uid://cyeb6r1sflv5y"
 
 [physics]
 

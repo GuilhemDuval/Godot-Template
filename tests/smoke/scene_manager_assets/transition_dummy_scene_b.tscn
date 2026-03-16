@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://da6qs1rahme6"]
+
+[ext_resource type="Script" uid="uid://cp2g7ml3nk8o4" path="res://tests/smoke/scene_manager_assets/transition_dummy_scene_b.gd" id="1_c1hct"]
+
+[node name="TransitionDummySceneA" type="Control" unique_id=847777186]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_c1hct")

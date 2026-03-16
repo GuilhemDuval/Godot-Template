@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://dtj2v2mkx2ygp"]
+
+[ext_resource type="Script" uid="uid://dyrv8380ifa2l" path="res://tests/smoke/test_scene_manager.gd" id="1_e7lqg"]
+
+[node name="TestStateManager" type="Node" unique_id=1091999316]
+script = ExtResource("1_e7lqg")
