@@ -18,6 +18,7 @@ config/icon="res://icon.svg"
 
 StateManager="*uid://cnyk5n7wsajyl"
 SceneManager="*uid://cyeb6r1sflv5y"
+SessionManager="*uid://en2c0pujy6s"
 
 [physics]
 
