@@ -70,7 +70,10 @@ func _run_all_tests() -> void:
 	_test_invalid_level_load()
 
 	await _test_transition_to_main_scene_with_general_transitions()
-	await _test_transition_to_state_with_general_transitions()
+	_test_load_main_scene_from_state()
+	_test_sync_main_scene_with_state()
+	await _test_transition_main_scene_from_state_with_general_transitions()
+	await _test_sync_main_scene_with_state_transition()
 	await _test_invalid_general_transition_path()
 	await _test_scene_owned_enter_and_exit_transitions()
 
@@ -213,22 +216,58 @@ func _test_transition_to_main_scene_with_general_transitions() -> void:
 		_assert_true(transition_finished_events[1]["phase"] == "in", "Second finished transition phase is in")
 
 
-func _test_transition_to_state_with_general_transitions() -> void:
+func _test_load_main_scene_from_state() -> void:
+	_prepare_clean_scene_manager()
+	_reset_event_buffers()
+
+	var result := SceneManager.load_main_scene_from_state(GameStates.State.MAIN_MENU)
+
+	_assert_true(result, "load_main_scene_from_state() succeeds for MAIN_MENU")
+	_assert_true(SceneManager.current_main_scene_path == "res://scenes/menus/main_menu.tscn", "load_main_scene_from_state() loads the mapped main scene")
+	_assert_true(main_scene_changed_events.size() == 1, "load_main_scene_from_state() emits one main_scene_changed signal")
+
+
+func _test_sync_main_scene_with_state() -> void:
+	_prepare_clean_scene_manager()
+	_reset_event_buffers()
+
+	var result := SceneManager.sync_main_scene_with_state(GameStates.State.TITLE)
+
+	_assert_true(result, "sync_main_scene_with_state() succeeds for TITLE")
+	_assert_true(SceneManager.current_main_scene_path == "res://scenes/menus/title_screen.tscn", "sync_main_scene_with_state() loads the mapped main scene")
+	_assert_true(main_scene_changed_events.size() == 1, "sync_main_scene_with_state() emits one main_scene_changed signal")
+
+
+func _test_transition_main_scene_from_state_with_general_transitions() -> void:
 	_prepare_clean_scene_manager()
 	SceneManager.change_main_scene("res://scenes/menus/title_screen.tscn")
 	_reset_event_buffers()
 
 	var transition_path := "res://core/transitions/transition_scenes/fade_black.tscn"
-	var result := await SceneManager.transition_to_state(
+	var result := await SceneManager.transition_main_scene_from_state(
 		GameStates.State.MAIN_MENU,
 		transition_path,
 		transition_path
 	)
 
-	_assert_true(result, "transition_to_state() succeeds for TITLE -> MAIN_MENU")
-	_assert_true(SceneManager.current_main_scene_path == "res://scenes/menus/main_menu.tscn", "transition_to_state() loads the mapped main scene")
-	_assert_true(transition_started_events.size() == 2, "transition_to_state() emits two transition_started events")
-	_assert_true(transition_finished_events.size() == 2, "transition_to_state() emits two transition_finished events")
+	_assert_true(result, "transition_main_scene_from_state() succeeds for TITLE -> MAIN_MENU")
+	_assert_true(SceneManager.current_main_scene_path == "res://scenes/menus/main_menu.tscn", "transition_main_scene_from_state() loads the mapped main scene")
+	_assert_true(transition_started_events.size() == 2, "transition_main_scene_from_state() emits two transition_started events")
+	_assert_true(transition_finished_events.size() == 2, "transition_main_scene_from_state() emits two transition_finished events")
+
+
+func _test_sync_main_scene_with_state_transition() -> void:
+	_prepare_clean_scene_manager()
+	SceneManager.change_main_scene("res://scenes/menus/title_screen.tscn")
+	_reset_event_buffers()
+
+	var result := await SceneManager.sync_main_scene_with_state_transition(
+		GameStates.State.TITLE,
+		GameStates.State.MAIN_MENU
+	)
+
+	_assert_true(result, "sync_main_scene_with_state_transition() succeeds for TITLE -> MAIN_MENU")
+	_assert_true(SceneManager.current_main_scene_path == "res://scenes/menus/main_menu.tscn", "sync_main_scene_with_state_transition() loads the mapped main scene")
 
 
 func _test_invalid_general_transition_path() -> void:

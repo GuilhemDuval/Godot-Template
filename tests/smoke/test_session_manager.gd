@@ -288,7 +288,7 @@ func _test_new_game_flow_with_state_and_scene() -> void:
 	var loading_state_ok := StateManager.set_state(GameStates.State.LOADING)
 	_assert_true(loading_state_ok, "StateManager accepts LOADING during new game flow")
 
-	var loading_scene_ok := SceneManager.load_main_scene_for_state(GameStates.State.LOADING)
+	var loading_scene_ok := SceneManager.load_main_scene_from_state(GameStates.State.LOADING)
 	_assert_true(loading_scene_ok, "SceneManager loads the LOADING scene during new game flow")
 
 	var in_game_state_ok := StateManager.set_state(GameStates.State.IN_GAME)
@@ -314,7 +314,7 @@ func _test_pause_flow_does_not_mutate_session() -> void:
 	SessionManager.start_new_session(TEST_LEVEL_ID, 6)
 
 	StateManager.set_state(GameStates.State.LOADING)
-	SceneManager.load_main_scene_for_state(GameStates.State.LOADING)
+	SceneManager.load_main_scene_from_state(GameStates.State.LOADING)
 	StateManager.set_state(GameStates.State.IN_GAME)
 	SceneManager.change_main_scene(GAME_ROOT_PATH)
 	SceneManager.load_level(TEST_LEVEL_PATH)
@@ -343,7 +343,7 @@ func _test_return_to_menu_flow() -> void:
 	SessionManager.start_new_session(TEST_LEVEL_ID, 8)
 
 	StateManager.set_state(GameStates.State.LOADING)
-	SceneManager.load_main_scene_for_state(GameStates.State.LOADING)
+	SceneManager.load_main_scene_from_state(GameStates.State.LOADING)
 	StateManager.set_state(GameStates.State.IN_GAME)
 	SceneManager.change_main_scene(GAME_ROOT_PATH)
 	SceneManager.load_level(TEST_LEVEL_PATH)

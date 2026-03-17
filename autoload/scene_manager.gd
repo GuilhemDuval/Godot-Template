@@ -1,5 +1,6 @@
 extends Node
 
+# Signals emitted when the visible scene structure changes.
 signal main_scene_changed(old_scene: Node, new_scene: Node, scene_path: String)
 signal overlay_opened(scene: Node, scene_path: String)
 signal overlay_closed(scene_path: String)
@@ -7,56 +8,54 @@ signal level_loaded(level_scene: Node, scene_path: String)
 signal level_unloaded(scene_path: String)
 signal scene_load_failed(scene_path: String, reason: String)
 
+# Signals emitted around transition playback.
 signal transition_started(transition_path: String, phase: String)
 signal transition_finished(transition_path: String, phase: String)
 
-# Cached references to the persistent app shell.
+# References to the persistent nodes of the application shell.
+# These are resolved once in setup() and then reused.
 var app_root: Node = null
 var main_layer: Node = null
 var ui_layer: Node = null
 var transition_layer: Node = null
 
-# Cached references to currently loaded runtime scenes.
+# References to the currently loaded runtime scenes.
+# main_scene: the current root content, for example TitleScreen or GameRoot
+# overlay_scene: UI shown on top, for example pause or options popup
+# level_scene: gameplay content injected inside GameRoot
 var current_main_scene: Node = null
 var current_overlay_scene: Node = null
 var current_level_scene: Node = null
 
-# Useful for reloads and debugging.
+# Stored paths for reloads, diagnostics, and emitted events.
 var current_main_scene_path: String = ""
 var current_overlay_scene_path: String = ""
 var current_level_scene_path: String = ""
 
-# Prevent overlapping scene transitions.
+# Guard used to avoid starting two main-scene transitions at once.
 var _main_scene_transition_running: bool = false
 
-# Paths inside AppRoot.
+# Expected children inside AppRoot.
 const MAIN_LAYER_PATH := NodePath("MainLayer")
 const UI_LAYER_PATH := NodePath("UILayer")
 const TRANSITION_LAYER_PATH := NodePath("TransitionLayer")
 
-# Expected path inside GameRoot for future level loading.
-# If the node does not exist yet, SceneManager can create it on demand.
+# Expected child inside GameRoot where gameplay levels are inserted.
+# If it does not exist yet, SceneManager can create it as a fallback.
 const LEVEL_CONTAINER_PATH := NodePath("LevelContainer")
 
-# Default mapping from global states to main scenes.
-# This should stay broad. Content-specific routing belongs in SessionManager
-# and future registries, not in SceneManager itself.
-const STATE_SCENE_MAP := {
-	GameStates.State.TITLE: "res://scenes/menus/title_screen.tscn",
-	GameStates.State.MAIN_MENU: "res://scenes/menus/main_menu.tscn",
-	GameStates.State.LOADING: "res://scenes/common/loading_screen.tscn",
-	GameStates.State.IN_GAME: "res://scenes/gameplay/game_root.tscn",
-	GameStates.State.OPTIONS: "res://scenes/menus/options_menu.tscn",
-	GameStates.State.CREDITS: "res://scenes/menus/title_screen.tscn", # TODO: replace with a dedicated credits scene
-}
+# State-to-scene routing is delegated to StateSceneRegistry.
+# SceneManager only consumes that mapping to know which root scene to load.
 
 func _ready() -> void:
-	# SceneManager stays passive until setup() is called from AppRoot
-	# or another bootstrap point.
+	# SceneManager does nothing by itself on startup.
+	# Another bootstrap point must call setup() explicitly.
 	pass
 
 
 func setup(root: Node) -> bool:
+	# Connect SceneManager to the persistent application shell.
+	# Without this, it cannot attach main scenes, overlays, or transitions.
 	if root == null:
 		push_error("SceneManager.setup() received a null root.")
 		return false
@@ -79,24 +78,39 @@ func setup(root: Node) -> bool:
 	return true
 
 
-func handle_state_change(new_state: int) -> bool:
-	var scene_path: String = STATE_SCENE_MAP.get(new_state, "")
+func sync_main_scene_with_state(new_state: int) -> bool:
+	return load_main_scene_from_state(new_state)
+
+
+func sync_main_scene_with_state_transition(previous_state: int, new_state: int) -> bool:
+	return await transition_main_scene_from_state(new_state)
+
+
+func load_main_scene_from_state(state: int) -> bool:
+	var scene_path: String = StateSceneRegistry.get_scene_path_for_state(state)
 	if scene_path == "":
+		_emit_load_failed("", "No scene is mapped for state %s." % GameStates.get_state_name(state))
 		return false
 
 	return change_main_scene(scene_path)
 
 
-func transition_for_state_change(previous_state: int, new_state: int) -> bool:
-	var scene_path: String = STATE_SCENE_MAP.get(new_state, "")
+func transition_main_scene_from_state(
+	state: int,
+	exit_transition_path: String = "",
+	enter_transition_path: String = ""
+) -> bool:
+	var scene_path: String = StateSceneRegistry.get_scene_path_for_state(state)
 	if scene_path == "":
-		_emit_load_failed("", "No scene is mapped for state %s." % GameStates.get_state_name(new_state))
+		_emit_load_failed("", "No scene is mapped for state %s." % GameStates.get_state_name(state))
 		return false
 
-	return await transition_to_main_scene(scene_path)
+	return await transition_to_main_scene(scene_path, exit_transition_path, enter_transition_path)
 
 
 func change_main_scene(scene_path: String) -> bool:
+	# Load and replace the current main scene immediately.
+	# This is the core low-level operation used by several public methods.
 	if main_layer == null:
 		_emit_load_failed(scene_path, "MainLayer is not configured.")
 		return false
@@ -129,6 +143,11 @@ func transition_to_main_scene(
 	exit_transition_path: String = "",
 	enter_transition_path: String = ""
 ) -> bool:
+	# Full main-scene change with optional exit and enter transitions.
+	# Transition sources can come from:
+	# 1. explicit arguments
+	# 2. methods exposed by the current/new scene
+	# 3. nothing, in which case the switch is still performed
 	if _main_scene_transition_running:
 		_emit_load_failed(scene_path, "A main scene transition is already running.")
 		return false
@@ -176,6 +195,7 @@ func transition_to_main_scene(
 
 
 func clear_main_scene() -> void:
+	# Remove the current main scene without replacing it.
 	if current_main_scene == null:
 		return
 
@@ -205,6 +225,8 @@ func reload_main_scene_with_transition(
 
 
 func open_overlay(scene_path: String) -> bool:
+	# Only one overlay is managed at a time.
+	# Opening a new one first closes the previous one.
 	if ui_layer == null:
 		_emit_load_failed(scene_path, "UILayer is not configured.")
 		return false
@@ -242,6 +264,10 @@ func close_overlay() -> void:
 
 
 func load_level(scene_path: String) -> bool:
+	# Level loading is separate from main-scene loading.
+	# The expected use case is:
+	# - main scene is GameRoot
+	# - level scene is inserted inside GameRoot/LevelContainer
 	var level_container := _get_or_create_level_container()
 	if level_container == null:
 		_emit_load_failed(scene_path, "Could not resolve LevelContainer.")
@@ -287,28 +313,6 @@ func reload_level() -> bool:
 	return load_level(current_level_scene_path)
 
 
-func load_main_scene_for_state(state: int) -> bool:
-	var scene_path: String = STATE_SCENE_MAP.get(state, "")
-	if scene_path == "":
-		_emit_load_failed("", "No scene is mapped for state %s." % GameStates.get_state_name(state))
-		return false
-
-	return change_main_scene(scene_path)
-
-
-func transition_to_state(
-	state: int,
-	exit_transition_path: String = "",
-	enter_transition_path: String = ""
-) -> bool:
-	var scene_path: String = STATE_SCENE_MAP.get(state, "")
-	if scene_path == "":
-		_emit_load_failed("", "No scene is mapped for state %s." % GameStates.get_state_name(state))
-		return false
-
-	return await transition_to_main_scene(scene_path, exit_transition_path, enter_transition_path)
-
-
 func get_current_main_scene() -> Node:
 	return current_main_scene
 
@@ -326,7 +330,8 @@ func is_main_scene_transition_running() -> bool:
 
 
 func _get_or_create_level_container() -> Node:
-	# We expect the current main scene to be GameRoot when loading a level.
+	# Levels are expected to live inside the current main scene.
+	# In practice, this means the main scene should usually be GameRoot.
 	if current_main_scene == null:
 		return null
 
@@ -334,7 +339,8 @@ func _get_or_create_level_container() -> Node:
 	if level_container != null:
 		return level_container
 
-	# Lightweight fallback for early template iterations.
+	# Fallback used when the current main scene does not expose a
+	# dedicated LevelContainer yet.
 	level_container = Node.new()
 	level_container.name = "LevelContainer"
 	current_main_scene.add_child(level_container)
@@ -342,6 +348,9 @@ func _get_or_create_level_container() -> Node:
 
 
 func _resolve_exit_transition_path(scene: Node, explicit_path: String) -> String:
+	# Priority:
+	# 1. explicit path given by caller
+	# 2. transition path exposed by the scene itself
 	if explicit_path != "":
 		return explicit_path
 
@@ -354,6 +363,7 @@ func _resolve_exit_transition_path(scene: Node, explicit_path: String) -> String
 
 
 func _resolve_enter_transition_path(scene: Node) -> String:
+	# Enter transition can be provided by the new scene itself.
 	if scene != null and scene.has_method("get_enter_transition_path"):
 		var path: Variant = scene.call("get_enter_transition_path")
 		if path is String:
@@ -363,6 +373,10 @@ func _resolve_enter_transition_path(scene: Node) -> String:
 
 
 func _play_general_transition(transition_scene_path: String, phase: String) -> bool:
+	# Plays a standalone transition scene inside TransitionLayer.
+	# Contract expected from the transition scene:
+	# - signal transition_finished
+	# - method play_out() or play_in() depending on phase
 	if transition_scene_path == "":
 		return true
 
@@ -414,6 +428,8 @@ func _play_general_transition(transition_scene_path: String, phase: String) -> b
 
 
 func _play_scene_owned_exit_transition(scene: Node) -> bool:
+	# Alternative transition model:
+	# the currently active scene can animate its own exit.
 	if scene == null:
 		return true
 
@@ -429,6 +445,7 @@ func _play_scene_owned_exit_transition(scene: Node) -> bool:
 
 
 func _play_scene_owned_enter_transition(scene: Node) -> bool:
+	# Mirror of _play_scene_owned_exit_transition() for scene entry.
 	if scene == null:
 		return true
 
@@ -444,5 +461,6 @@ func _play_scene_owned_enter_transition(scene: Node) -> bool:
 
 
 func _emit_load_failed(scene_path: String, reason: String) -> void:
+	# Centralized failure reporting for both signals and console output.
 	scene_load_failed.emit(scene_path, reason)
 	push_error("SceneManager load failed for '%s': %s" % [scene_path, reason])
