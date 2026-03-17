@@ -1,0 +1,107 @@
+[gd_scene format=3 uid="uid://1v74vp6snc3f"]
+
+[node name="CreditsMenu" type="Control" unique_id=1743236638]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="." unique_id=2061548207]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0392157, 0.0470588, 0.0784314, 1)
+
+[node name="ContentMargin" type="MarginContainer" parent="." unique_id=367682210]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 72.0
+offset_top = 48.0
+offset_right = -72.0
+offset_bottom = -48.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="ContentMargin" unique_id=1826195233]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 18
+
+[node name="Title" type="Label" parent="ContentMargin/Content" unique_id=2085518065]
+layout_mode = 2
+text = "CREDITS"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="ContentMargin/Content" unique_id=1076301563]
+custom_minimum_size = Vector2(900, 0)
+layout_mode = 2
+text = "Dedicated placeholder scene for credits and attribution"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="CreditsPanel" type="PanelContainer" parent="ContentMargin/Content" unique_id=508746433]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CreditsMargin" type="MarginContainer" parent="ContentMargin/Content/CreditsPanel" unique_id=533735412]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="CreditsList" type="VBoxContainer" parent="ContentMargin/Content/CreditsPanel/CreditsMargin" unique_id=1565931338]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="ProjectLine" type="Label" parent="ContentMargin/Content/CreditsPanel/CreditsMargin/CreditsList" unique_id=459343962]
+layout_mode = 2
+text = "Project Template"
+horizontal_alignment = 1
+
+[node name="Role01" type="Label" parent="ContentMargin/Content/CreditsPanel/CreditsMargin/CreditsList" unique_id=1930386525]
+custom_minimum_size = Vector2(900, 0)
+layout_mode = 2
+text = "Design & Direction
+Your Team Name"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Role02" type="Label" parent="ContentMargin/Content/CreditsPanel/CreditsMargin/CreditsList" unique_id=229994563]
+custom_minimum_size = Vector2(900, 0)
+layout_mode = 2
+text = "Programming
+Placeholder Contributors"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Role03" type="Label" parent="ContentMargin/Content/CreditsPanel/CreditsMargin/CreditsList" unique_id=1507625198]
+custom_minimum_size = Vector2(900, 0)
+layout_mode = 2
+text = "Art, Audio, Production
+Placeholder Contributors"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Thanks" type="Label" parent="ContentMargin/Content/CreditsPanel/CreditsMargin/CreditsList" unique_id=705886359]
+custom_minimum_size = Vector2(900, 0)
+layout_mode = 2
+size_flags_vertical = 3
+text = "Special thanks
+Engine tools, playtesters, collaborators, and future you."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Footer" type="Label" parent="ContentMargin/Content" unique_id=1793543731]
+layout_mode = 2
+text = "Static credits scene, ready for routing tests"
+horizontal_alignment = 1

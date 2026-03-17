@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://b2v5x4f1e6mi8"]
+[gd_scene load_steps=2 format=3 uid="uid://b2v5x4f1e6mi8"]
 
 [ext_resource type="Script" uid="uid://rxqsumyrh24t" path="res://scenes/menus/title_screen.gd" id="1_n17qi"]
 
@@ -10,3 +10,91 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_n17qi")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0745098, 0.0901961, 0.137255, 1)
+
+[node name="TopGlow" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 220.0
+grow_horizontal = 2
+color = Color(0.160784, 0.211765, 0.333333, 0.6)
+
+[node name="CenterContent" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ContentMargin" type="MarginContainer" parent="CenterContent"]
+layout_mode = 2
+theme_override_constants/margin_left = 64
+theme_override_constants/margin_top = 48
+theme_override_constants/margin_right = 64
+theme_override_constants/margin_bottom = 48
+
+[node name="Content" type="VBoxContainer" parent="CenterContent/ContentMargin"]
+layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="Kicker" type="Label" parent="CenterContent/ContentMargin/Content"]
+layout_mode = 2
+text = "GODOT TEMPLATE"
+horizontal_alignment = 1
+
+[node name="Title" type="Label" parent="CenterContent/ContentMargin/Content"]
+layout_mode = 2
+text = "TITLE SCREEN"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Subtitle" type="Label" parent="CenterContent/ContentMargin/Content"]
+layout_mode = 2
+text = "Prototype shell for boot, transitions, and menu flow"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Spacer" type="Control" parent="CenterContent/ContentMargin/Content"]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="PromptPanel" type="PanelContainer" parent="CenterContent/ContentMargin/Content"]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+
+[node name="PromptMargin" type="MarginContainer" parent="CenterContent/ContentMargin/Content/PromptPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="Prompt" type="Label" parent="CenterContent/ContentMargin/Content/PromptPanel/PromptMargin"]
+layout_mode = 2
+text = "Press Any Key to Continue\nPlaceholder visual only, no input logic yet"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Footer" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -44.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "v0.1 • scene layout test"
+horizontal_alignment = 1

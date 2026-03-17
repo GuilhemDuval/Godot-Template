@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://cp8y0xm6pm1tu"]
+[gd_scene load_steps=2 format=3 uid="uid://cp8y0xm6pm1tu"]
 
 [ext_resource type="Script" uid="uid://bf2b8ijwj6ml6" path="res://scenes/menus/main_menu.gd" id="1_xqga4"]
 
@@ -10,3 +10,119 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_xqga4")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.054902, 0.0627451, 0.0941176, 1)
+
+[node name="ContentMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 72.0
+offset_top = 56.0
+offset_right = -72.0
+offset_bottom = -56.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="HBoxContainer" parent="ContentMargin"]
+layout_mode = 2
+theme_override_constants/separation = 32
+
+[node name="LeftColumn" type="VBoxContainer" parent="ContentMargin/Content"]
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="SectionLabel" type="Label" parent="ContentMargin/Content/LeftColumn"]
+layout_mode = 2
+text = "MAIN MENU"
+
+[node name="GameTitle" type="Label" parent="ContentMargin/Content/LeftColumn"]
+layout_mode = 2
+text = "Project Template"
+
+[node name="Intro" type="Label" parent="ContentMargin/Content/LeftColumn"]
+layout_mode = 2
+text = "Static menu layout used to test scene loading, transitions, and future navigation hookups."
+autowrap_mode = 3
+
+[node name="MenuCard" type="PanelContainer" parent="ContentMargin/Content/LeftColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MenuMargin" type="MarginContainer" parent="ContentMargin/Content/LeftColumn/MenuCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="MenuItems" type="VBoxContainer" parent="ContentMargin/Content/LeftColumn/MenuCard/MenuMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="StartButton" type="Button" parent="ContentMargin/Content/LeftColumn/MenuCard/MenuMargin/MenuItems"]
+layout_mode = 2
+text = "New Game"
+
+[node name="ContinueButton" type="Button" parent="ContentMargin/Content/LeftColumn/MenuCard/MenuMargin/MenuItems"]
+layout_mode = 2
+text = "Continue"
+
+[node name="OptionsButton" type="Button" parent="ContentMargin/Content/LeftColumn/MenuCard/MenuMargin/MenuItems"]
+layout_mode = 2
+text = "Options"
+
+[node name="CreditsButton" type="Button" parent="ContentMargin/Content/LeftColumn/MenuCard/MenuMargin/MenuItems"]
+layout_mode = 2
+text = "Credits"
+
+[node name="QuitButton" type="Button" parent="ContentMargin/Content/LeftColumn/MenuCard/MenuMargin/MenuItems"]
+layout_mode = 2
+text = "Quit"
+
+[node name="RightColumn" type="VBoxContainer" parent="ContentMargin/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 18
+
+[node name="PreviewPanel" type="PanelContainer" parent="ContentMargin/Content/RightColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PreviewMargin" type="MarginContainer" parent="ContentMargin/Content/RightColumn/PreviewPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="PreviewContent" type="VBoxContainer" parent="ContentMargin/Content/RightColumn/PreviewPanel/PreviewMargin"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="PreviewTitle" type="Label" parent="ContentMargin/Content/RightColumn/PreviewPanel/PreviewMargin/PreviewContent"]
+layout_mode = 2
+text = "Overview"
+
+[node name="PreviewText" type="Label" parent="ContentMargin/Content/RightColumn/PreviewPanel/PreviewMargin/PreviewContent"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "This placeholder area can later become a save-slot preview, a background illustration, or contextual help for the currently selected menu item."
+autowrap_mode = 3
+
+[node name="Footer" type="Label" parent="ContentMargin/Content/RightColumn"]
+layout_mode = 2
+text = "No button actions are wired yet"
+horizontal_alignment = 2

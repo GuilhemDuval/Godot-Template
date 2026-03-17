@@ -10,3 +10,115 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_bp0ux")
+
+[node name="Background" type="ColorRect" parent="." unique_id=286594566]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0705882, 0.0784314, 0.109804, 1)
+
+[node name="ContentMargin" type="MarginContainer" parent="." unique_id=1004277720]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 72.0
+offset_top = 56.0
+offset_right = -72.0
+offset_bottom = -56.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="ContentMargin" unique_id=1415354615]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="Header" type="VBoxContainer" parent="ContentMargin/Content" unique_id=142314436]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="ContentMargin/Content/Header" unique_id=2061182983]
+layout_mode = 2
+text = "OPTIONS"
+
+[node name="Subtitle" type="Label" parent="ContentMargin/Content/Header" unique_id=1129593516]
+layout_mode = 2
+text = "Static placeholders for future preferences binding"
+
+[node name="SettingsPanel" type="PanelContainer" parent="ContentMargin/Content" unique_id=1949378822]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SettingsMargin" type="MarginContainer" parent="ContentMargin/Content/SettingsPanel" unique_id=1472291541]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="SettingsList" type="VBoxContainer" parent="ContentMargin/Content/SettingsPanel/SettingsMargin" unique_id=1207694855]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 18
+
+[node name="AudioSection" type="VBoxContainer" parent="ContentMargin/Content/SettingsPanel/SettingsMargin/SettingsList" unique_id=1132838837]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AudioTitle" type="Label" parent="ContentMargin/Content/SettingsPanel/SettingsMargin/SettingsList/AudioSection" unique_id=565263745]
+layout_mode = 2
+text = "Audio"
+
+[node name="MasterVolume" type="HSlider" parent="ContentMargin/Content/SettingsPanel/SettingsMargin/SettingsList/AudioSection" unique_id=1182147244]
+layout_mode = 2
+value = 80.0
+editable = false
+
+[node name="VideoSection" type="VBoxContainer" parent="ContentMargin/Content/SettingsPanel/SettingsMargin/SettingsList" unique_id=832612741]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="VideoTitle" type="Label" parent="ContentMargin/Content/SettingsPanel/SettingsMargin/SettingsList/VideoSection" unique_id=1160252205]
+layout_mode = 2
+text = "Video"
+
+[node name="Fullscreen" type="CheckBox" parent="ContentMargin/Content/SettingsPanel/SettingsMargin/SettingsList/VideoSection" unique_id=566058052]
+layout_mode = 2
+disabled = true
+button_pressed = true
+text = "Fullscreen"
+
+[node name="GameplaySection" type="VBoxContainer" parent="ContentMargin/Content/SettingsPanel/SettingsMargin/SettingsList" unique_id=554617897]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GameplayTitle" type="Label" parent="ContentMargin/Content/SettingsPanel/SettingsMargin/SettingsList/GameplaySection" unique_id=1887846910]
+layout_mode = 2
+text = "Gameplay"
+
+[node name="Vibration" type="CheckBox" parent="ContentMargin/Content/SettingsPanel/SettingsMargin/SettingsList/GameplaySection" unique_id=755374188]
+layout_mode = 2
+disabled = true
+text = "Controller vibration"
+
+[node name="HintText" type="Label" parent="ContentMargin/Content/SettingsPanel/SettingsMargin/SettingsList" unique_id=157335117]
+layout_mode = 2
+text = "These controls are visual placeholders only."
+
+[node name="FooterButtons" type="HBoxContainer" parent="ContentMargin/Content" unique_id=2129551572]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 2
+
+[node name="BackButton" type="Button" parent="ContentMargin/Content/FooterButtons" unique_id=1430618832]
+layout_mode = 2
+text = "Back"
+
+[node name="ApplyButton" type="Button" parent="ContentMargin/Content/FooterButtons" unique_id=423880081]
+layout_mode = 2
+disabled = true
+text = "Apply"

@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://vetpph4m7dou"]
+[gd_scene load_steps=2 format=3 uid="uid://vetpph4m7dou"]
 
 [ext_resource type="Script" uid="uid://b7bs6tdjefl25" path="res://scenes/menus/pause_menu.gd" id="1_fwndu"]
 
@@ -10,3 +10,58 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_fwndu")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PausePanel" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+
+[node name="PauseMargin" type="MarginContainer" parent="CenterContainer/PausePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="PauseContent" type="VBoxContainer" parent="CenterContainer/PausePanel/PauseMargin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="CenterContainer/PausePanel/PauseMargin/PauseContent"]
+layout_mode = 2
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="CenterContainer/PausePanel/PauseMargin/PauseContent"]
+layout_mode = 2
+text = "Resume"
+
+[node name="OptionsButton" type="Button" parent="CenterContainer/PausePanel/PauseMargin/PauseContent"]
+layout_mode = 2
+text = "Options"
+
+[node name="MainMenuButton" type="Button" parent="CenterContainer/PausePanel/PauseMargin/PauseContent"]
+layout_mode = 2
+text = "Return to Main Menu"
+
+[node name="Hint" type="Label" parent="CenterContainer/PausePanel/PauseMargin/PauseContent"]
+layout_mode = 2
+text = "Overlay mockup for SceneManager tests"
+horizontal_alignment = 1
+autowrap_mode = 3
