@@ -1,48 +1,8 @@
 extends Control
 
-const ROUTER_SCRIPT := preload("res://autoload/input_router.gd")
-
-const ACTION_SPECS := [
-	{"name": &"move_left", "category": InputRouter.Category.GAMEPLAY_MOVE, "keys": [KEY_A, KEY_LEFT]},
-	{"name": &"move_right", "category": InputRouter.Category.GAMEPLAY_MOVE, "keys": [KEY_D, KEY_RIGHT]},
-	{"name": &"move_up", "category": InputRouter.Category.GAMEPLAY_MOVE, "keys": [KEY_W, KEY_UP]},
-	{"name": &"move_down", "category": InputRouter.Category.GAMEPLAY_MOVE, "keys": [KEY_S, KEY_DOWN]},
-	{"name": &"interact", "category": InputRouter.Category.GAMEPLAY_ACTION, "keys": [KEY_E, KEY_SPACE]},
-	{"name": &"attack", "category": InputRouter.Category.GAMEPLAY_ACTION, "keys": [KEY_F]},
-	{"name": &"ui_up", "category": InputRouter.Category.UI_NAVIGATION, "keys": [KEY_UP]},
-	{"name": &"ui_down", "category": InputRouter.Category.UI_NAVIGATION, "keys": [KEY_DOWN]},
-	{"name": &"ui_left", "category": InputRouter.Category.UI_NAVIGATION, "keys": [KEY_LEFT]},
-	{"name": &"ui_right", "category": InputRouter.Category.UI_NAVIGATION, "keys": [KEY_RIGHT]},
-	{"name": &"ui_accept", "category": InputRouter.Category.UI_CONFIRM, "keys": [KEY_ENTER]},
-	{"name": &"ui_cancel", "category": InputRouter.Category.UI_CANCEL, "keys": [KEY_ESCAPE]},
-	{"name": &"pause", "category": InputRouter.Category.PAUSE_TOGGLE, "keys": [KEY_P]},
-	{"name": &"dialogue_advance", "category": InputRouter.Category.DIALOGUE_ADVANCE, "keys": [KEY_SPACE]},
-	{"name": &"dialogue_choice_up", "category": InputRouter.Category.DIALOGUE_CHOICE, "keys": [KEY_PAGEUP]},
-	{"name": &"dialogue_choice_down", "category": InputRouter.Category.DIALOGUE_CHOICE, "keys": [KEY_PAGEDOWN]},
-	{"name": &"debug_toggle", "category": InputRouter.Category.DEBUG, "keys": [KEY_F3]},
-]
-
-const FLAG_SPECS := [
-	{"name": InputRouter.FLAG_MENU_OPEN, "label": "Menu open"},
-	{"name": InputRouter.FLAG_PAUSE_OPEN, "label": "Pause open"},
-	{"name": InputRouter.FLAG_DIALOGUE_ACTIVE, "label": "Dialogue active"},
-	{"name": InputRouter.FLAG_CINEMATIC_ACTIVE, "label": "Cinematic active"},
-	{"name": InputRouter.FLAG_TRANSITION_ACTIVE, "label": "Transition active"},
-	{"name": InputRouter.FLAG_INPUT_GLOBALLY_BLOCKED, "label": "Global block"},
-]
-
-const CATEGORY_ORDER := [
-	InputRouter.Category.GAMEPLAY_MOVE,
-	InputRouter.Category.GAMEPLAY_ACTION,
-	InputRouter.Category.UI_NAVIGATION,
-	InputRouter.Category.UI_CONFIRM,
-	InputRouter.Category.UI_CANCEL,
-	InputRouter.Category.PAUSE_TOGGLE,
-	InputRouter.Category.DIALOGUE_ADVANCE,
-	InputRouter.Category.DIALOGUE_CHOICE,
-	InputRouter.Category.DEBUG,
-	InputRouter.Category.SYSTEM,
-]
+var ACTION_SPECS: Array = InputRegistry.get_smoke_test_action_specs()
+var FLAG_SPECS: Array = InputRegistry.get_flag_specs_for_smoke_test()
+var CATEGORY_ORDER: Array = InputRegistry.get_category_order()
 
 var router: InputRouter
 var owns_router_instance := false
@@ -51,8 +11,12 @@ var passed_count := 0
 var failed_count := 0
 var action_press_counts: Dictionary = {}
 var action_last_status: Dictionary = {}
+var missing_action_names: Array[String] = []
+var actions_missing_bindings: Array[String] = []
+var fallback_injected_actions: Array[String] = []
 
 var smoke_summary_label: Label
+var missing_actions_label: RichTextLabel
 var context_panel: VBoxContainer
 var categories_panel: VBoxContainer
 var actions_panel: VBoxContainer
@@ -111,24 +75,38 @@ func _resolve_router() -> void:
 		owns_router_instance = false
 		return
 
-	router = ROUTER_SCRIPT.new()
+	router = InputRouter.new()
 	router.name = "InputRouterSmokeLocal"
 	add_child(router)
 	owns_router_instance = true
 
 
 func _ensure_test_actions_exist() -> void:
+	missing_action_names.clear()
+	actions_missing_bindings.clear()
+	fallback_injected_actions.clear()
+
 	for spec in ACTION_SPECS:
 		var action_name: StringName = spec["name"]
-		if not InputMap.has_action(action_name):
+		var action_name_text := String(action_name)
+		var had_action_before := InputMap.has_action(action_name)
+		if not had_action_before:
+			missing_action_names.append(action_name_text)
 			InputMap.add_action(action_name)
+		elif InputMap.action_get_events(action_name).is_empty():
+			actions_missing_bindings.append(action_name_text)
 
-		for keycode in spec["keys"]:
+		var injected_fallback := false
+		for keycode in spec.get("fallback_keys", []):
 			if not _action_has_key(action_name, keycode):
 				var key_event := InputEventKey.new()
 				key_event.physical_keycode = keycode
 				key_event.keycode = keycode
 				InputMap.action_add_event(action_name, key_event)
+				injected_fallback = true
+
+		if injected_fallback:
+			fallback_injected_actions.append(action_name_text)
 
 
 func _action_has_key(action_name: StringName, keycode: int) -> bool:
@@ -163,13 +141,19 @@ func _build_ui() -> void:
 	root_vbox.add_child(title)
 
 	var instructions := Label.new()
-	instructions.text = "Use the left panel to toggle context flags or force category overrides. Press the keys shown on the right to verify which actions are allowed or blocked in the current context."
+	instructions.text = "Use the left panel to toggle context flags or force category overrides. Press the keys shown on the right to verify which actions are allowed or blocked in the current context. Missing InputMap actions are reported below and get temporary fallback keys so the scene stays testable."
 	instructions.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	root_vbox.add_child(instructions)
 
 	smoke_summary_label = Label.new()
 	smoke_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	root_vbox.add_child(smoke_summary_label)
+
+	missing_actions_label = RichTextLabel.new()
+	missing_actions_label.bbcode_enabled = true
+	missing_actions_label.fit_content = true
+	missing_actions_label.scroll_active = false
+	root_vbox.add_child(missing_actions_label)
 
 	var body := HBoxContainer.new()
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -296,7 +280,7 @@ func _wrap_log(title_text: String, log_widget: RichTextLabel) -> Control:
 
 func _build_context_panel() -> void:
 	var status := Label.new()
-	status.text = "Toggle context flags, category overrides, and the visibility filters below."
+	status.text = "Toggle context flags, category overrides, and the visibility filters below. The warning panel above tells you which actions were missing from InputMap and got temporary fallback keys."
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	context_panel.add_child(status)
 
@@ -362,7 +346,7 @@ func _build_categories_panel() -> void:
 		panel.add_child(vbox)
 
 		var title := Label.new()
-		title.text = _get_category_name(category)
+		title.text = InputRegistry.get_category_name(category)
 		title.add_theme_font_size_override("font_size", 16)
 		vbox.add_child(title)
 
@@ -411,7 +395,7 @@ func _build_actions_panel() -> void:
 		panel.add_child(vbox)
 
 		var title := Label.new()
-		title.text = String(action_name)
+		title.text = "%s (%s)" % [spec.get("label", String(action_name)), String(action_name)]
 		title.add_theme_font_size_override("font_size", 16)
 		vbox.add_child(title)
 
@@ -527,12 +511,34 @@ func _register_action_event(action_name: StringName, pressed: bool) -> void:
 
 func _refresh_all_views() -> void:
 	_refresh_flag_buttons()
+	_refresh_missing_actions_warning()
 	_refresh_section_titles()
 	for category in CATEGORY_ORDER:
 		_refresh_category_row(category)
 	for spec in ACTION_SPECS:
 		_refresh_action_row(spec["name"], spec["category"])
 	_update_smoke_summary_label()
+
+
+func _refresh_missing_actions_warning() -> void:
+	if missing_actions_label == null:
+		return
+
+	if missing_action_names.is_empty() and actions_missing_bindings.is_empty() and fallback_injected_actions.is_empty():
+		missing_actions_label.text = "[color=green]InputMap coverage looks complete for the registered smoke-test actions.[/color]"
+		return
+
+	var lines: Array[String] = []
+	lines.append("[color=yellow]InputMap audit warning[/color]")
+	if not missing_action_names.is_empty():
+		lines.append("Missing actions before fallback injection: %s" % ", ".join(missing_action_names))
+	if not actions_missing_bindings.is_empty():
+		lines.append("Existing actions with no bindings before fallback injection: %s" % ", ".join(actions_missing_bindings))
+	if not fallback_injected_actions.is_empty():
+		lines.append("Fallback keys injected so the scene stays testable: %s" % ", ".join(fallback_injected_actions))
+	lines.append("Review Project Settings > Input Map after this test and replace missing bindings with real project bindings.")
+	missing_actions_label.text = "
+".join(lines)
 
 
 func _refresh_section_titles() -> void:
@@ -572,7 +578,7 @@ func _refresh_category_row(category: int) -> void:
 	var override_label: Label = category_override_labels.get(category)
 	if override_label != null:
 		if router.has_category_override(category):
-			var forced: bool = bool(router.get_category_override(category))
+			var forced: bool = router.get_category_override(category)
 			override_label.text = "Override: forced %s" % ("ALLOWED" if forced else "BLOCKED")
 		else:
 			override_label.text = "Override: none"
@@ -597,7 +603,7 @@ func _refresh_action_row(action_name: StringName, category: int) -> void:
 
 	var category_label: Label = action_category_labels.get(action_name)
 	if category_label != null:
-		category_label.text = "Category: %s" % _get_category_name(category)
+		category_label.text = "Category: %s" % InputRegistry.get_category_name(category)
 
 	var bindings_label: Label = action_bindings_labels.get(action_name)
 	if bindings_label != null:
@@ -630,38 +636,10 @@ func _get_action_names_for_category(category: int) -> Array[String]:
 
 
 func _get_action_category_from_specs(action_name: StringName) -> int:
-	for spec in ACTION_SPECS:
-		if spec["name"] == action_name:
-			return spec["category"]
-	return InputRouter.Category.NONE
-
-
-func _get_category_name(category: int) -> String:
-	match category:
-		InputRouter.Category.NONE:
-			return "NONE"
-		InputRouter.Category.GAMEPLAY_MOVE:
-			return "GAMEPLAY_MOVE"
-		InputRouter.Category.GAMEPLAY_ACTION:
-			return "GAMEPLAY_ACTION"
-		InputRouter.Category.UI_NAVIGATION:
-			return "UI_NAVIGATION"
-		InputRouter.Category.UI_CONFIRM:
-			return "UI_CONFIRM"
-		InputRouter.Category.UI_CANCEL:
-			return "UI_CANCEL"
-		InputRouter.Category.PAUSE_TOGGLE:
-			return "PAUSE_TOGGLE"
-		InputRouter.Category.DIALOGUE_ADVANCE:
-			return "DIALOGUE_ADVANCE"
-		InputRouter.Category.DIALOGUE_CHOICE:
-			return "DIALOGUE_CHOICE"
-		InputRouter.Category.DEBUG:
-			return "DEBUG"
-		InputRouter.Category.SYSTEM:
-			return "SYSTEM"
-		_:
-			return "UNKNOWN(%s)" % str(category)
+	var spec := InputRegistry.get_action_spec(action_name)
+	if spec.is_empty():
+		return InputRouter.Category.NONE
+	return int(spec["category"])
 
 
 func _update_smoke_summary_label() -> void:
@@ -669,11 +647,13 @@ func _update_smoke_summary_label() -> void:
 
 
 func _append_event_log(message: String) -> void:
-	event_log.append_text("%s\n" % message)
+	event_log.append_text("%s
+" % message)
 
 
 func _append_signal_log(message: String) -> void:
-	signal_log.append_text("%s\n" % message)
+	signal_log.append_text("%s
+" % message)
 
 
 func _on_flag_button_toggled(button_pressed: bool, flag_name: StringName) -> void:
@@ -740,7 +720,7 @@ func _on_router_reset() -> void:
 
 func _on_category_override_changed(category: int, is_overridden: bool, allowed: bool) -> void:
 	var message := "Category override changed: %s -> %s" % [
-		_get_category_name(category),
+		InputRegistry.get_category_name(category),
 		"forced %s" % ("ALLOWED" if allowed else "BLOCKED") if is_overridden else "cleared"
 	]
 	_append_signal_log(message)
