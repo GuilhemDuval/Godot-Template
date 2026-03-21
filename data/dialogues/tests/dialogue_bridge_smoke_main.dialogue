@@ -1,0 +1,148 @@
+# DialogueBridge smoke test.
+#
+# This file demonstrates a variety of useful Dialogue Manager features:
+# - titles
+# - choices
+# - typing speed and pauses
+# - animated text with BBCode-like effects
+# - bridge helper calls
+# - session values through the bridge
+# - context node method calls
+# - audio through AudioManager-backed context methods
+# - tags such as #voice
+# - imported snippets
+# - weighted random groups
+# - conditional choices
+
+import "res://data/dialogues/tests/dialogue_bridge_smoke_snippets.dialogue" as snippets
+
+~ start
+do DialogueBridge.call_context_node_method("dialogue_smoke", "add_visit")
+Guide: Welcome to the DialogueBridge smoke test.
+Guide: The visit count is now {{DialogueBridge.session_get_data("dialogue/visit_count", 0)}}.
+Guide: Pick a chapter to inspect one feature at a time.
+- Typing, pauses and animated text => typing_demo
+- Bridge helpers and session values => bridge_demo
+- Context node methods => context_demo
+- Audio, tags and voice => audio_demo
+- Import and jump-and-return => import_demo
+- Weighted random lines => random_demo
+- Conditional choice demo [if DialogueBridge.session_get_flag("dialogue/demo_key", false)] => unlocked_demo
+- End the conversation => END
+
+
+~ alt_start
+Guide: This alternative start jumps directly to a smaller demo branch.
+Guide: It is useful to test that DialogueBridge.start_dialogue(resource, start_title) works as expected.
+- Go to the context demo => context_demo
+- Go to the audio demo => audio_demo
+- Back to the main menu => start
+
+
+~ typing_demo
+Guide: [speed=0.35]This line types slowly, then it pauses.[wait=0.25] Then it continues.
+Guide: Rich text works too: [wave amp=25 freq=5]wave[/wave], [shake rate=20 level=8]shake[/shake], and [rainbow freq=0.3 sat=0.8 val=0.9]rainbow[/rainbow].
+do DialogueBridge.call_context_node_method("dialogue_smoke", "play_demo_ui")
+Guide: The previous line also triggered a UI sound through the registered context.
+Guide: This line advances automatically after a short delay.[next=0.9]
+=> start
+
+
+~ bridge_demo
+do DialogueBridge.session_set_flag("dialogue/demo_key", true)
+do DialogueBridge.session_set_data("dialogue/demo_note", "The bridge wrote this value from the dialogue file.")
+do DialogueBridge.session_set_data("dialogue/demo_branch", "bridge_demo")
+do DialogueBridge.call_context_node_method("dialogue_smoke", "mark_tutorial_seen")
+do DialogueBridge.call_context_node_method("dialogue_smoke", "rename_player", ["Guilhem"])
+do DialogueBridge.call_context_node_method("dialogue_smoke", "increment_demo_counter")
+Guide: Dialogue can write values through the bridge.
+Guide: dialogue/demo_key is now {{DialogueBridge.session_get_flag("dialogue/demo_key", false)}}.
+Guide: dialogue/demo_note is now "{{DialogueBridge.session_get_data("dialogue/demo_note", "<missing>")}}".
+Guide: dialogue/player_name is now {{DialogueBridge.session_get_data("dialogue/player_name", "Hero")}}.
+Guide: The newly unlocked conditional choice is now available in the start menu.
+=> start
+
+
+~ context_demo
+do DialogueBridge.call_context_node_method("dialogue_smoke", "mark_context_pinged")
+do DialogueBridge.call_context_node_method("dialogue_smoke", "set_panel_message_intro")
+Guide: Dialogue can call methods on a registered scene object through DialogueBridge.
+Guide: The current context mood is {{DialogueBridge.get_context_value("dialogue_smoke", "demo_mood", "unknown")}}.
+- Cycle the preview color
+	do DialogueBridge.call_context_node_method("dialogue_smoke", "cycle_demo_box_color")
+	do DialogueBridge.call_context_node_method("dialogue_smoke", "remember_choice", ["cycle_color"])
+	Guide: The preview box color just changed.
+	=> context_demo
+- Set the mood to happy
+	do DialogueBridge.call_context_node_method("dialogue_smoke", "set_mood_happy")
+	do DialogueBridge.call_context_node_method("dialogue_smoke", "remember_choice", ["happy"])
+	Guide: The context mood is now {{DialogueBridge.get_context_value("dialogue_smoke", "demo_mood", "unknown")}}.
+	=> context_demo
+- Set the mood to surprised
+	do DialogueBridge.call_context_node_method("dialogue_smoke", "set_mood_surprised")
+	do DialogueBridge.call_context_node_method("dialogue_smoke", "remember_choice", ["surprised"])
+	Guide: The context mood is now {{DialogueBridge.get_context_value("dialogue_smoke", "demo_mood", "unknown")}}.
+	=> context_demo
+- Back to the main menu
+	=> start
+
+
+~ audio_demo
+Guide: Audio can be triggered by code called from the dialogue.
+- Play music
+	do DialogueBridge.call_context_node_method("dialogue_smoke", "play_demo_music")
+	Guide: Demo music was started through the context method.
+	=> audio_demo
+- Play alternate music
+	do DialogueBridge.call_context_node_method("dialogue_smoke", "play_alt_demo_music")
+	Guide: Alternate music was started through the context method.
+	=> audio_demo
+- Play a gameplay sound effect
+	do DialogueBridge.call_context_node_method("dialogue_smoke", "play_demo_sfx")
+	Guide: A sound effect just played.
+	=> audio_demo
+- Play another sound effect
+	do DialogueBridge.call_context_node_method("dialogue_smoke", "play_alt_demo_sfx")
+	Guide: A second sound effect just played.
+	=> audio_demo
+- Play a UI click
+	do DialogueBridge.call_context_node_method("dialogue_smoke", "play_demo_ui")
+	Guide: A UI sound just played.
+	=> audio_demo
+- Play a bubble UI sound
+	do DialogueBridge.call_context_node_method("dialogue_smoke", "play_demo_bubble")
+	Guide: A bubble UI sound just played.
+	=> audio_demo
+- Stop all audio
+	do DialogueBridge.call_context_node_method("dialogue_smoke", "stop_demo_audio")
+	Guide: All audio was stopped.
+	=> audio_demo
+- Show a line with a voice tag
+	Guide [#voice=res://audio/ui/CGM3_Dialogue_Text_01_1.wav]: This line uses the default example balloon's voice tag support.
+	=> audio_demo
+- Back to the main menu
+	=> start
+
+
+~ import_demo
+Guide: The next command jumps to an imported title and then comes back here.
+=>< snippets/imported_lesson
+Guide: We returned from the imported snippet.
+Guide: dialogue/import_seen is now {{DialogueBridge.session_get_flag("dialogue/import_seen", false)}}.
+=> start
+
+
+~ random_demo
+Guide: The three lines below belong to one weighted random group.
+% Guide: This is the default random line.
+%2 Guide: This line is twice as likely to appear.
+%0.25 Guide: This rare line only appears sometimes.
+Guide: After the random group, the dialogue continues normally.
+=> start
+
+
+~ unlocked_demo
+Guide: This title only becomes available after the bridge demo sets dialogue/demo_key to true.
+Guide: dialogue/demo_branch currently says {{DialogueBridge.session_get_data("dialogue/demo_branch", "<missing>")}}.
+Guide: dialogue/last_choice currently says {{DialogueBridge.session_get_data("dialogue/last_choice", "<missing>")}}.
+=> start

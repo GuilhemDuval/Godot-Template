@@ -1,5 +1,4 @@
 extends Node
-class_name InputRouter
 
 signal context_flag_changed(flag_name: StringName, value: bool)
 signal permissions_changed()
@@ -30,6 +29,7 @@ const FLAG_INPUT_GLOBALLY_BLOCKED: StringName = &"input_globally_blocked"
 var _flags: Dictionary = {}
 var _category_overrides: Dictionary = {}
 var _action_category_map: Dictionary = {}
+
 
 func _ready() -> void:
 	_rebuild_action_category_map_from_registry()
@@ -198,7 +198,7 @@ func is_dialogue_input_allowed() -> bool:
 	return is_category_allowed(Category.DIALOGUE_ADVANCE) or is_category_allowed(Category.DIALOGUE_CHOICE)
 
 
-static func get_category_name(category: int) -> String:
+func get_category_name(category: int) -> String:
 	match category:
 		Category.NONE:
 			return "NONE"
@@ -226,7 +226,7 @@ static func get_category_name(category: int) -> String:
 			return "UNKNOWN(%s)" % str(category)
 
 
-static func category_name_to_value(category_name: StringName) -> int:
+func category_name_to_value(category_name: StringName) -> int:
 	match String(category_name):
 		"NONE":
 			return Category.NONE

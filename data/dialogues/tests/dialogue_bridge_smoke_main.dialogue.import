@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://bgcqbcdal70s7"
+path="res://.godot/imported/dialogue_bridge_smoke_main.dialogue-1ab9447badbd31a340760d49cee89821.tres"
+
+[deps]
+
+source_file="res://data/dialogues/tests/dialogue_bridge_smoke_main.dialogue"
+dest_files=["res://.godot/imported/dialogue_bridge_smoke_main.dialogue-1ab9447badbd31a340760d49cee89821.tres"]
+
+[params]
+
+defaults=true

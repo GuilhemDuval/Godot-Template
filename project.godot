@@ -24,11 +24,17 @@ StateManager="*uid://cnyk5n7wsajyl"
 SceneManager="*uid://cyeb6r1sflv5y"
 SessionManager="*uid://en2c0pujy6s"
 AudioManager="*uid://dkmmda37vji5m"
+InputRouter="*uid://7fyx7cw5ae44"
 DialogueManager="*uid://c3rodes2l3gxb"
+DialogueBridge="*uid://c3285hj4is0tx"
 
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/dialogue_manager/plugin.cfg")
+
+[internationalization]
+
+locale/translations_pot_files=PackedStringArray("res://data/dialogues/dialogue_example.dialogue", "res://data/dialogues/tests/dialogue_bridge_smoke_main.dialogue", "res://data/dialogues/tests/dialogue_bridge_smoke_snippets.dialogue")
 
 [physics]
 

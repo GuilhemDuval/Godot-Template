@@ -1,0 +1,10 @@
+# Imported snippets for the DialogueBridge smoke test.
+# This file exists to demonstrate import syntax and jump-and-return.
+
+~ imported_lesson
+Narrator: This title comes from an imported dialogue file.
+do DialogueBridge.call_context_node_method("dialogue_smoke", "set_panel_message_imported")
+Narrator: Imported titles can still call DialogueBridge helpers and context methods.
+do DialogueBridge.session_set_flag("dialogue/import_seen", true)
+Narrator: The imported snippet just set dialogue/import_seen to {{DialogueBridge.session_get_flag("dialogue/import_seen", false)}}.
+=> END
