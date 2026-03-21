@@ -24,6 +24,11 @@ StateManager="*uid://cnyk5n7wsajyl"
 SceneManager="*uid://cyeb6r1sflv5y"
 SessionManager="*uid://en2c0pujy6s"
 AudioManager="*uid://dkmmda37vji5m"
+DialogueManager="*uid://c3rodes2l3gxb"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/dialogue_manager/plugin.cfg")
 
 [physics]
 
