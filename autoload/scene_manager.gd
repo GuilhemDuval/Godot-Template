@@ -82,7 +82,7 @@ func sync_main_scene_with_state(new_state: int) -> bool:
 	return load_main_scene_from_state(new_state)
 
 
-func sync_main_scene_with_state_transition(previous_state: int, new_state: int) -> bool:
+func sync_main_scene_with_state_transition(new_state: int) -> bool:
 	return await transition_main_scene_from_state(new_state)
 
 

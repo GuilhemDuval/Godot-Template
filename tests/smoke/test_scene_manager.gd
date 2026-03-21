@@ -143,11 +143,12 @@ func _test_load_and_unload_level() -> void:
 
 	_reset_event_buffers()
 
-	var load_result := SceneManager.load_level("res://levels/test_level.tscn")
+	var test_level_path := AppConfig.level_scene_path(AppConfig.DEFAULT_LEVEL_ID)
+	var load_result := SceneManager.load_level(test_level_path)
 
 	_assert_true(load_result, "load_level() succeeds with test_level.tscn")
 	_assert_true(SceneManager.get_current_level_scene() != null, "Current level scene is set")
-	_assert_true(SceneManager.current_level_scene_path == "res://levels/test_level.tscn", "Level scene path is updated")
+	_assert_true(SceneManager.current_level_scene_path == test_level_path, "Level scene path is updated")
 	_assert_true(level_loaded_events.size() == 1, "level_loaded is emitted once")
 
 	SceneManager.unload_level()
@@ -262,7 +263,6 @@ func _test_sync_main_scene_with_state_transition() -> void:
 	_reset_event_buffers()
 
 	var result := await SceneManager.sync_main_scene_with_state_transition(
-		GameStates.State.TITLE,
 		GameStates.State.MAIN_MENU
 	)
 

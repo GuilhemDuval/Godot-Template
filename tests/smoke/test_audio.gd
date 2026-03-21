@@ -5,7 +5,7 @@ const CATEGORY_SFX := 1
 const CATEGORY_UI := 2
 const CATEGORY_AMBIENCE := 3
 
-const BUS_NAMES := [&"Master", &"Music", &"SFX", &"UI", &"Ambience"]
+const BUS_NAMES := [AppConfig.BUS_MASTER, AppConfig.BUS_MUSIC, AppConfig.BUS_SFX, AppConfig.BUS_UI, AppConfig.BUS_AMBIENCE]
 
 const TEST_SOUNDS := [
 	{

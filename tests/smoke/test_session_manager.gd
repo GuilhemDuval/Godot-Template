@@ -22,8 +22,9 @@ var scene_load_failed_events: Array = []
 
 var _test_root: Node = null
 
-const TEST_LEVEL_ID := "test_level"
-const TEST_LEVEL_PATH := "res://levels/test_level.tscn"
+var TEST_LEVEL_ID: StringName = AppConfig.DEFAULT_LEVEL_ID
+var TEST_LEVEL_PATH: String = AppConfig.level_scene_path(TEST_LEVEL_ID)
+
 const MAIN_MENU_PATH := "res://scenes/menus/main_menu.tscn"
 const LOADING_PATH := "res://scenes/common/loading_screen.tscn"
 const GAME_ROOT_PATH := "res://scenes/gameplay/game_root.tscn"
@@ -368,9 +369,9 @@ func _prepare_clean_environment() -> void:
 	StateManager.unlock_state()
 	StateManager.set_paused(false)
 
-	_clear_children(SceneManager.main_layer)
-	_clear_children(SceneManager.ui_layer)
-	_clear_children(SceneManager.transition_layer)
+	await _clear_children(SceneManager.main_layer)
+	await _clear_children(SceneManager.ui_layer)
+	await _clear_children(SceneManager.transition_layer)
 
 	SceneManager.current_main_scene = null
 	SceneManager.current_overlay_scene = null

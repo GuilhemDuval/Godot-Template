@@ -13,11 +13,11 @@ enum Category {
 	AMBIENCE,
 }
 
-const BUS_MASTER := &"Master"
-const BUS_MUSIC := &"Music"
-const BUS_SFX := &"SFX"
-const BUS_UI := &"UI"
-const BUS_AMBIENCE := &"Ambience"
+const BUS_MASTER := AppConfig.BUS_MASTER
+const BUS_MUSIC := AppConfig.BUS_MUSIC
+const BUS_SFX := AppConfig.BUS_SFX
+const BUS_UI := AppConfig.BUS_UI
+const BUS_AMBIENCE := AppConfig.BUS_AMBIENCE
 
 const SILENT_DB := -80.0
 const DEFAULT_SFX_POOL_SIZE := 8
