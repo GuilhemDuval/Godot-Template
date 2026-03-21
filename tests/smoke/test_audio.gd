@@ -571,7 +571,7 @@ func _make_button(text: String, callback: Callable) -> Button:
 	button.process_mode = Node.PROCESS_MODE_ALWAYS
 	button.text = text
 	button.custom_minimum_size = Vector2(0.0, 36.0)
-	button.pressed.connect(callback)
+	button.button_down.connect(callback)
 	return button
 
 
@@ -634,13 +634,13 @@ func _make_bus_row(bus_name: StringName) -> Control:
 	var mute_button := Button.new()
 	mute_button.process_mode = Node.PROCESS_MODE_ALWAYS
 	mute_button.text = "Mute"
-	mute_button.pressed.connect(func(): _set_bus_volume(bus_name, 0.0))
+	mute_button.button_down.connect(func(): _set_bus_volume(bus_name, 0.0))
 	row.add_child(mute_button)
 
 	var full_button := Button.new()
 	full_button.process_mode = Node.PROCESS_MODE_ALWAYS
 	full_button.text = "1.0"
-	full_button.pressed.connect(func(): _set_bus_volume(bus_name, 1.0))
+	full_button.button_down.connect(func(): _set_bus_volume(bus_name, 1.0))
 	row.add_child(full_button)
 
 	slider.value_changed.connect(_on_bus_slider_changed.bind(bus_name, value_label))
